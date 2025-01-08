@@ -1,7 +1,9 @@
 package com.example.semproject
 
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -39,6 +41,17 @@ class MainActivity : AppCompatActivity() {
 
         loadBooksFromFirestore()
         listenToBooksUpdates()
+
+        binding.searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s.toString()
+                searchBooks(query)
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun updateBook(book: Library) {
@@ -251,6 +264,29 @@ class MainActivity : AppCompatActivity() {
                 books.add(book)
             }
             bookList.notifyDataSetChanged()
+        }
+    }
+
+    private fun searchBooks(query: String) {
+        if (query.isNotBlank()) {
+            firestore.collection("books")
+                .whereEqualTo("name", query)
+                .get()
+                .addOnSuccessListener { result ->
+                    books.clear()
+                    for (document in result) {
+                        val book = document.toObject(Library::class.java)
+                        books.add(book)
+                    }
+                    bookList.notifyDataSetChanged()
+                    println("Books loaded from Firestore")
+                }
+                .addOnFailureListener { e ->
+                    println("Error loading books: ${e.message}")
+                }
+        } else {
+            // Pokud je vyhledávací dotaz prázdný, načtěte všechny knihy
+            loadBooksFromFirestore()
         }
     }
 }
