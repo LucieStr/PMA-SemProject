@@ -10,6 +10,7 @@ class BookList (
     private val onBookTaken: (Library) -> Unit,//Calback pro změnu stavu
     private val onEditBook: (Library) -> Unit,
     private val onDeleteBook: (Library) -> Unit
+
     ) : RecyclerView.Adapter<BookList.BookViewHolder>(){
 
 

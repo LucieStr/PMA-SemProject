@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         println("Firebase initialized successfully")
         firestore = FirebaseFirestore.getInstance()
 
-        bookList = BookList(books, { book -> updateBook(book) }, { book -> showEditBookDialog(book) }, { book -> deleteBook(book) })
+        bookList = BookList(books, { book -> updateBook(book) }, { book -> showEditBookDialog(book) }, { book -> confirmDeleteBook(book) })
 
         binding.recyclerViewBooks.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewBooks.adapter = bookList
@@ -169,6 +169,21 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
+    private fun confirmDeleteBook(book: Library) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Smazat knihu")
+        builder.setMessage("Opravdu chcete smazat tuto knihu?")
+
+        builder.setPositiveButton("Ano") { _, _ ->
+            deleteBook(book)
+        }
+        builder.setNegativeButton("Ne") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        builder.show()
+    }
+
     private fun deleteBook(book: Library) {
         if (book.id.isNotBlank()) {
             val bookRef = firestore.collection("books").document(book.id)
@@ -200,8 +215,6 @@ class MainActivity : AppCompatActivity() {
         )
         firestore.collection("books").document(newBook.id).set(newBook)
             .addOnSuccessListener {
-                books.add(newBook)
-                bookList.notifyItemInserted(books.size - 1)
                 println("Book added to Firestore: $name")
             }
             .addOnFailureListener { e ->
