@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         println("Firebase initialized successfully")
         firestore = FirebaseFirestore.getInstance()
 
-        bookList = BookList(books) { book -> updateBook(book) }
+        bookList = BookList(books, { book -> updateBook(book) }, { book -> showEditBookDialog(book) }, { book -> deleteBook(book) })
 
         binding.recyclerViewBooks.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewBooks.adapter = bookList
@@ -37,18 +37,12 @@ class MainActivity : AppCompatActivity() {
             showAddBookDialog()
         }
 
-
-
         loadBooksFromFirestore()
         listenToBooksUpdates()
     }
 
-
-
     private fun updateBook(book: Library) {
-        // Check if the book object is not null
         if (book.id.isNotBlank()) {
-            // Firestore update logic
             val bookRef = firestore.collection("books").document(book.id)
             val updates = hashMapOf<String, Any>(
                 "name" to book.name,
@@ -73,17 +67,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun showAddBookDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Přidat knihu")
 
-        // Vytvoření layoutu pro dialog
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
 
-        // Vytvoření vstupních polí
         val inputName = EditText(this)
         inputName.hint = "Název knihy"
         inputName.inputType = InputType.TYPE_CLASS_TEXT
@@ -124,6 +114,81 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
+    private fun showEditBookDialog(book: Library) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Upravit knihu")
+
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val inputName = EditText(this)
+        inputName.hint = "Název knihy"
+        inputName.inputType = InputType.TYPE_CLASS_TEXT
+        inputName.setText(book.name)
+        layout.addView(inputName)
+
+        val inputAuthor = EditText(this)
+        inputAuthor.hint = "Autor knihy"
+        inputAuthor.inputType = InputType.TYPE_CLASS_TEXT
+        inputAuthor.setText(book.autor)
+        layout.addView(inputAuthor)
+
+        val inputPlace = EditText(this)
+        inputPlace.hint = "Místo"
+        inputPlace.inputType = InputType.TYPE_CLASS_TEXT
+        inputPlace.setText(book.place)
+        layout.addView(inputPlace)
+
+        val inputType = EditText(this)
+        inputType.hint = "Typ knihy"
+        inputType.inputType = InputType.TYPE_CLASS_TEXT
+        inputType.setText(book.type)
+        layout.addView(inputType)
+
+        builder.setView(layout)
+
+        builder.setPositiveButton("Upravit") { _, _ ->
+            val bookName = inputName.text.toString()
+            val bookAuthor = inputAuthor.text.toString()
+            val bookPlace = inputPlace.text.toString()
+            val bookType = inputType.text.toString()
+            if (bookName.isNotBlank()) {
+                book.name = bookName
+                book.autor = bookAuthor
+                book.place = bookPlace
+                book.type = bookType
+                updateBook(book)
+            } else {
+                Toast.makeText(this, "Kniha nemůže být bez názvu", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.setNegativeButton("Zrušit") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        builder.show()
+    }
+
+    private fun deleteBook(book: Library) {
+        if (book.id.isNotBlank()) {
+            val bookRef = firestore.collection("books").document(book.id)
+            bookRef.delete()
+                .addOnSuccessListener {
+                    books.remove(book)
+                    bookList.notifyDataSetChanged()
+                    println("Book deleted successfully: ${book.name}")
+                    Toast.makeText(this, "Smazáno", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    println("Error deleting book: ${e.message}")
+                    Toast.makeText(this, "Chyba", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            println("Error: Book ID is blank")
+            Toast.makeText(this, "Kniha nemá ID", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun addBook(name: String, autor: String, place: String, type: String) {
         val newBook = Library(
             id = firestore.collection("books").document().id,
@@ -133,7 +198,6 @@ class MainActivity : AppCompatActivity() {
             type = type,
             taken = false
         )
-        // Uložíme úkol do Firestore
         firestore.collection("books").document(newBook.id).set(newBook)
             .addOnSuccessListener {
                 books.add(newBook)
@@ -176,6 +240,4 @@ class MainActivity : AppCompatActivity() {
             bookList.notifyDataSetChanged()
         }
     }
-
-
 }

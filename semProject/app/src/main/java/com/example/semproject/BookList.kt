@@ -7,7 +7,9 @@ import com.example.semproject.databinding.BookBinding
 
 class BookList (
     private val books: List<Library>, //seznam knih
-    private val onBookTaken: (Library) -> Unit //Calback pro změnu stavu
+    private val onBookTaken: (Library) -> Unit,//Calback pro změnu stavu
+    private val onEditBook: (Library) -> Unit,
+    private val onDeleteBook: (Library) -> Unit
     ) : RecyclerView.Adapter<BookList.BookViewHolder>(){
 
 
@@ -27,8 +29,13 @@ class BookList (
                     book.taken = isChecked
                     onBookTaken(book)
                 }
+                binding.btnEdit.setOnClickListener {
+                    onEditBook(book)
+                }
 
-                //logika pro zarezervování knížek
+                binding.btnDelete.setOnClickListener {
+                    onDeleteBook(book)
+                }
 
             }
         }
