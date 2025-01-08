@@ -7,20 +7,20 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Header TextView for the title "Knihovna" -->
+
     <TextView
         android:id="@+id/headerTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="152dp"
+        android:layout_marginTop="16dp"
         android:text="Knihovna"
+        android:textAlignment="center"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- EditText for searching books -->
     <EditText
         android:id="@+id/searchEditText"
         android:layout_width="0dp"
@@ -54,7 +54,8 @@
         android:contentDescription="Add Book"
         android:src="@drawable/baseline_add_24"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:backgroundTint="@color/add"/>
 
 
 

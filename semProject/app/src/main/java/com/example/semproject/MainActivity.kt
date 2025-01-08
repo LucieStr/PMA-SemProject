@@ -1,5 +1,6 @@
 package com.example.semproject
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
@@ -197,6 +198,7 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun deleteBook(book: Library) {
         if (book.id.isNotBlank()) {
             val bookRef = firestore.collection("books").document(book.id)
@@ -235,6 +237,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun loadBooksFromFirestore() {
         firestore.collection("books").get()
             .addOnSuccessListener { result ->
@@ -251,6 +254,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun listenToBooksUpdates() {
         firestore.collection("books").addSnapshotListener { snapshots, e ->
             if (e != null) {
@@ -267,6 +271,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun searchBooks(query: String) {
         if (query.isNotBlank()) {
             firestore.collection("books")
@@ -278,7 +283,7 @@ class MainActivity : AppCompatActivity() {
                         val book = document.toObject(Library::class.java)
                         books.add(book)
                     }
-                    bookList.notifyDataSetChanged()
+                     bookList.notifyDataSetChanged()
                     println("Books loaded from Firestore")
                 }
                 .addOnFailureListener { e ->
